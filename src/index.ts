@@ -1,18 +1,15 @@
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import schema from '../schemas/schema';
+import { resolvers } from './resolvers/index';
 
 const app = express();
-
-const rootValue = {
-  showTodos: () => 'TODO the todos list'
-}
 
 app.use(
   '/graphql',
   graphqlHTTP({
     schema: schema,
-    rootValue,
+    rootValue: resolvers,
     graphiql: true,
   }),
 );
