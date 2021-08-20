@@ -1,16 +1,16 @@
-// export const resolvers = {
-//   // todos
-//   showTodos: () => 'TODO the todos list'
-// }
-
+import DB from '../db/db';
+const inMemoryDb = new DB(4)
 class Resolvers {
-  constructor() {
-
+  db: DB;
+  constructor(db: DB) {
+    this.db = db;
   }
 
-  async getAllTodos() {
-    
+  async showTodos() {
+    return await this.db.getAllTodos();
   }
 }
 
-export const resolvers = new Resolvers();
+export const resolvers = new Resolvers(inMemoryDb);
+
+// todo - have a model layer

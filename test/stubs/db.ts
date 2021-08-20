@@ -1,21 +1,7 @@
-// createItem
-// getItem
-// listItems
-// updateItem
-// deleteItem
-// resetDB
-
 import { assert } from 'chai';
-import { toUnicode } from 'node:punycode';
 import {Todo} from '../../src/types';
 
-// stubs
-
-// making a request to database, instead of actually doing it
-// implementing the Redis db functionality
-// create item adds it to DB, what would i want to return?
-
-// input is content as a string
+// implementing the Redis db functionality in memory
 
 // todo builder to create number of todos
 type TodoBuilder = (num: number) => Todo[];
@@ -27,13 +13,13 @@ export default class StubDB {
   }
 
   private createTodos: TodoBuilder = (num) => {
-    const trueOrFalse = Math.random() > 0.5;
+    // const trueOrFalse = Math.random() > 0.5;
     const todos = [];
     for (let i = 1; i < num; i++) {
       todos.push({
         id: i,
         task: `${i}: get this done`,
-        complete: trueOrFalse
+        complete: false
       })
     }
     return todos;
@@ -42,8 +28,6 @@ export default class StubDB {
   getAllTodos() {
     return this.todos;
   }
-
-  // where to create id for todo? in db
 
   createTodo(task: string, complete: boolean) {
     const id = this.todos.length + 1;
@@ -63,29 +47,43 @@ export default class StubDB {
       return todo.id === id ? { ...todo, task: updatedTask } : todo
     })
   }
+
+  deleteTodo(id: number): Todo[] {
+    return this.todos.filter(todo => todo.id !== id);
+  }
 }
 
-// describe('getTodo', () => {
-//   const stubDB = new StubDB(3);
-//   it('gets Todo that exists', () => {
-//     const actual = stubDB.getTodo(2);
-//     assert.propertyVal(actual, 'id', 2)
-//     assert.propertyVal(actual, 'task', '2: get this done')
-//   })
+describe('DB in memory Stub', () => {
+  // beforeEach(function() {
+  // });
 
-//   it('when Todo does not exist then return message', () => {
-//     const nonExistantTodo = stubDB.getTodo(4);
-//     assert.strictEqual(nonExistantTodo, 'Sorry this todo does not exist')
-//   })
-// })
-
-describe('updateTodo', () => {
   const stubDB = new StubDB(3);
-  it('updates a todo', () => {
+
+  it('updateTodo updates a todo', () => {
     const updatedTodo = stubDB.updateTodo(2, '2: really get this done now');
     assert.propertyVal(updatedTodo[1], 'task', '2: really get this done now');
+  });
+
+  it('getTodo gets the todo', () => {
+    const todo = stubDB.getTodo(1) as Todo;
+    assert.equal(todo.id, 1)
+  });
+
+  it('getTodo returns a message when todo does not exist', () => {
+    const todo = stubDB.getTodo(10) as string;
+    assert.equal(todo, 'Sorry this todo does not exist');
+  });
+
+  it('createTodo', () => {
+    const todosWithCreated = stubDB.createTodo('Do new thing', false);
+    assert.deepStrictEqual(todosWithCreated[2], {id: 3, task: 'Do new thing', complete: false});
+  });
+
+  it('deleteTodo removes the todo', () => {
+    const todosWithOneDeleted = stubDB.deleteTodo(1);
+    assert.equal(todosWithOneDeleted.length, 1);
   })
-})
+});
 
 
 
